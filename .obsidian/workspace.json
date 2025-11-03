@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "407acb4d5013859c",
+        "id": "e37cbe27dddb6841",
         "type": "tabs",
         "children": [
           {
-            "id": "31ea2459665871da",
+            "id": "2d918a910a69adbe",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Article_pt_BR.md",
-                "mode": "preview",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Article_pt_BR"
+              "title": "New tab"
             }
           }
         ]
@@ -78,7 +74,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "516562630fbba3b7",
@@ -169,25 +166,27 @@
       "bases:Create new base": false
     }
   },
-  "active": "31ea2459665871da",
+  "active": "2d918a910a69adbe",
   "lastOpenFiles": [
-    "data/typing_test.csv",
+    "data/full_data.csv",
     "outputs/bigram_timing_heatmap.png",
-    "outputs/unigram_timing_heatmap.png",
-    "Article_pt_BR.md",
-    "Article.md",
+    "outputs/key_cost_analysis_a.png",
     "data/README.md",
-    "outputs/best_layout.txt",
     "outputs/corpus_character_frequencies.txt",
+    "scripts/analyze_key_cost.py",
+    "Article_pt_BR.md",
+    "outputs/best_layout.txt",
+    "outputs/unigram_timing_heatmap.png",
+    "data/tolkien.txt~",
+    "data/tolkien.txt",
+    "data/typing_test.csv",
+    "Article.md",
     "outputs/fitness.png",
     "outputs/heatmap.png",
     "README.md",
     "data/synthetic_typing_full_uni_bi_fused.csv",
     "scripts/fuse_typing_csvs.py",
     "data/synthetic_typing_full_uni_bi_v3_noisy.csv",
-    "data/synthetic_typing_full_uni_bi_v2_sameRowHeavy.csv",
-    "data/synthetic_typing_full_uni_bi_v1.csv",
-    "requirements.txt",
-    "data/typing test .csv"
+    "data/synthetic_typing_full_uni_bi_v2_sameRowHeavy.csv"
   ]
 }

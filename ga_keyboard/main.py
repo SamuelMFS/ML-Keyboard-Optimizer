@@ -118,7 +118,12 @@ def main() -> None:
 	print(layout_string(best))
 	print("\nMelhor layout (ASCII):")
 	print(format_layout_ascii(best))
-	print(f"\nMelhor custo: {best_cost:.2f} ms, aptidão: {best_fit:.6f}")
+	# Format fitness with scientific notation if very small
+	if best_fit < 0.000001:
+		fitness_str = f"{best_fit:.2e}"
+	else:
+		fitness_str = f"{best_fit:.6f}"
+	print(f"\nMelhor custo: {best_cost:.2f} ms, aptidão: {fitness_str}")
 	print(f"Custo da linha de base (QWERTY): {baseline_cost:.2f} ms")
 	print(f"Melhoria sobre QWERTY: {improvement:.2f}%")
 
