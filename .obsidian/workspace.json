@@ -11,10 +11,14 @@
             "id": "814b5507217e2286",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Apresetacao.md",
+                "mode": "preview",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Apresetacao"
             }
           }
         ]

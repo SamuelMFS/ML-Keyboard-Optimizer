@@ -3,6 +3,36 @@
 O projeto BagreType coleta dados empíricos de digitação através da plataforma [bagretype.com](https://bagretype.com) e utiliza algoritmos genéticos para otimizar layouts de teclado. Este guia explica cada visualização e como interpretá-la.
  
 De maneira simples, o projeto se trata da coleta te tempos de resposta de usuarios para apertar teclas unicas e combinacoes de 2-3 teclas. Com esses dados podemos computar o "gasto" fisico de digitar qualquer corpora de texto dado.
+##  Metodologia de Coleta de Dados
+
+### Plataforma BagreType
+
+**URL**: [bagretype.com](https://bagretype.com)
+
+**Repositório**: [github.com/SamuelMFS/BagreType](https://github.com/SamuelMFS/BagreType)
+
+**Como funciona**:
+1. **Participantes**: Recrutados através de comunidades online (Discord, fóruns de digitação)
+2. **Interface**: Website exibe caracteres ou sequências aleatórias na tela
+3. **Medição**: Sistema registra o tempo desde a exibição até a pressão da tecla correspondente
+4. **Dados coletados**:
+   - **Unigramas**: Tempo de reação para caracteres individuais
+   - **Bigramas**: Tempo total e tempo entre teclas consecutivas
+   - **Trigramas** (opcional): Sequências de três caracteres
+5. **Armazenamento**: Dados salvos em CSV com coluna JSON contendo arrays de registros de timing
+
+**Estrutura dos dados**:
+```json
+{
+  "sequence": "th",
+  "letterTimings": [
+    {"letter": "t", "reactionTime": 210},
+    {"letter": "h", "reactionTime": 230}
+  ],
+  "totalSequenceTime": 440
+}
+```
+
 
 ---
 
@@ -85,8 +115,7 @@ python -m ga_keyboard.main \
 
 1. **Contexto**: "Enquanto o heatmap de unigramas mostra o tempo de teclas isoladas, este mostra o custo médio de bigramas envolvendo cada tecla. Isso captura a dificuldade de transições."
 2. **Diferença fundamental**: "Uma tecla pode ser rápida sozinha, mas lenta em certas combinações—por exemplo, repetir a mesma tecla ('aa') é mais lento que alternar entre teclas diferentes."
-3. **Dados**: "Temos [X] medições de bigramas, coletadas quando participantes digitaram sequências de dois caracteres na plataforma BagreType."
-4. **Relevância**: "O algoritmo genético usa esses dados para otimizar layouts que minimizam o tempo total, considerando não apenas teclas individuais, mas também as transições comuns no corpus."
+3. **Relevância**: "O algoritmo genético usa esses dados para otimizar layouts que minimizam o tempo total, considerando não apenas teclas individuais, mas também as transições comuns no corpus."
 
 ---
 
@@ -156,7 +185,7 @@ python -m ga_keyboard.main \
 4. **Parâmetros**: "Usamos população de 200, taxa de mutação de 10%, taxa de crossover de 70% e preservamos os 5 melhores indivíduos (elitismo)."
 
 ---
-### 6. Heatmap de Custo por Tecla do Layout Evoluído
+### 6. Heatmap de Custo melhorado por Tecla do Layout Evoluído
 
 **Arquivo**: `outputs/heatmap.png`
 ![Frequência de caracteres](outputs/heatmap.png)
@@ -184,44 +213,6 @@ python -m ga_keyboard.main \
 4. **Limitações**: "Este é um cálculo aproximado que distribui o custo de bigramas igualmente entre as duas teclas envolvidas. Serve como visualização qualitativa."
 
 ---
-
-##  Metodologia de Coleta de Dados
-
-### Plataforma BagreType
-
-**URL**: [bagretype.com](https://bagretype.com)
-
-**Repositório**: [github.com/SamuelMFS/BagreType](https://github.com/SamuelMFS/BagreType)
-
-**Como funciona**:
-1. **Participantes**: Recrutados através de comunidades online (Discord, fóruns de digitação)
-2. **Interface**: Website exibe caracteres ou sequências aleatórias na tela
-3. **Medição**: Sistema registra o tempo desde a exibição até a pressão da tecla correspondente
-4. **Dados coletados**:
-   - **Unigramas**: Tempo de reação para caracteres individuais
-   - **Bigramas**: Tempo total e tempo entre teclas consecutivas
-   - **Trigramas** (opcional): Sequências de três caracteres
-5. **Armazenamento**: Dados salvos em CSV com coluna JSON contendo arrays de registros de timing
-
-**Estrutura dos dados**:
-```json
-{
-  "sequence": "th",
-  "letterTimings": [
-    {"letter": "t", "reactionTime": 210},
-    {"letter": "h", "reactionTime": 230}
-  ],
-  "totalSequenceTime": 440
-}
-```
-
-**Volume de dados**:
-- [X] participantes
-- [Y] sessões de digitação
-- [Z] medições totais (unigramas + bigramas + trigramas)
-
----
-
 ##  Interpretação dos Resultados
 
 ### Comparação QWERTY vs. Layout Evoluído
@@ -238,22 +229,18 @@ Custo da linha de base (QWERTY): 834,945,898.00 ms
 Melhoria sobre QWERTY: 9.41%
 ```
 
-1. **Resultado quantitativo**: "O layout evoluído reduz o tempo estimado de digitação em [9.41%] comparado ao QWERTY para o corpus de português."
+1. **Resultado quantitativo**: "O layout evoluído reduz o tempo estimado de digitação em [9.41%] comparado ao QWERTY para o corpus de Machado de Assis."
 
 ---
-##  Pontos para Perguntas da Audiência
+##  Algumas Perguntas Chave
 
 ### "Por que o layout fica esquisito?"
 
-**Resposta**: "O algoritmo otimiza apenas para velocidade de digitação, não para aprendizado ou familiaridade. Layouts otimizados podem parecer estranhos porque priorizam eficiência biomecânica sobre padrões conhecidos. Em trabalhos futuros, podemos adicionar penalidades para layouts muito diferentes do QWERTY."
+**Resposta**: "O algoritmo otimiza apenas para velocidade de digitação, não para aprendizado ou familiaridade. Layouts otimizados podem parecer estranhos porque priorizam eficiência biomecânica sobre padrões empiricos. Em trabalhos futuros, podemos adicionar penalidades para layouts muito diferentes do QWERTY."
 
 ### "Os dados são representativos?"
 
 **Resposta**: "Coletamos dados de *~1.800* participantes proficientes em digitação através da plataforma BagreType. Os dados mostram padrões ergonômicos esperados (home row mais rápida, repetições mais lentas), validando a qualidade. Expandir o número de participantes é um trabalho futuro."
-
-### "Como validar que o layout é realmente melhor?"
-
-**Resposta**: "O custo é calculado a partir de dados empíricos, mas a validação final requer testes com usuários reais. O próximo passo é implementar o layout evoluído em um teclado virtual e conduzir testes A/B comparando com QWERTY em digitação real."
 
 ---
 
@@ -265,16 +252,5 @@ Melhoria sobre QWERTY: 9.41%
 - **Autores**: Samuel Marcio Fonseca Santos e João Pedro de Souza Letro (UniFran)
 
 ---
-
-##  Checklist de Apresentação
-
-Antes da apresentação, verifique:
-
-- [x] Todos os gráficos foram gerados e estão atualizados
-- [x] Os valores numéricos (melhorias, custos) foram atualizados conforme última execução
-- [x] Layout ASCII do melhor resultado está legível
-
----
-
 Samuel Marcio Fonseca Santos
 Joao Pedro de Souza Letro
