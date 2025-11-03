@@ -66,7 +66,3 @@ The parser aggregates averages into:
 - Fitness is the inverse of the corpus typing cost computed from observed timings.
 - GA uses tournament selection, OX crossover, and swap mutation.
 - Heatmap approximates per-key contribution (shares n-gram costs equally among involved keys).
-# ML-Keyboard-Optimizer
-# ML-Keyboard-Optimizer
-# ML-Keyboard-Optimizer
-# ML-Keyboard-Optimizer
