@@ -4,17 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "e37cbe27dddb6841",
+        "id": "c44dc0bf5853e0ef",
         "type": "tabs",
         "children": [
           {
-            "id": "2d918a910a69adbe",
+            "id": "cb118db68d3b9df4",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Apresetacao.md",
+                "mode": "preview",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Apresetacao"
             }
           }
         ]
@@ -74,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "516562630fbba3b7",
@@ -166,27 +169,34 @@
       "bases:Create new base": false
     }
   },
-  "active": "2d918a910a69adbe",
+  "active": "cb118db68d3b9df4",
   "lastOpenFiles": [
-    "data/full_data.csv",
-    "outputs/bigram_timing_heatmap.png",
-    "outputs/key_cost_analysis_a.png",
-    "data/README.md",
-    "outputs/corpus_character_frequencies.txt",
-    "scripts/analyze_key_cost.py",
-    "Article_pt_BR.md",
-    "outputs/best_layout.txt",
-    "outputs/unigram_timing_heatmap.png",
-    "data/tolkien.txt~",
-    "data/tolkien.txt",
-    "data/typing_test.csv",
     "Article.md",
-    "outputs/fitness.png",
-    "outputs/heatmap.png",
+    "Apresetacao.md",
+    "outputs/best_layout.txt",
     "README.md",
-    "data/synthetic_typing_full_uni_bi_fused.csv",
-    "scripts/fuse_typing_csvs.py",
-    "data/synthetic_typing_full_uni_bi_v3_noisy.csv",
-    "data/synthetic_typing_full_uni_bi_v2_sameRowHeavy.csv"
+    "data/README.md",
+    "outputs/corpus_bigram_frequencies.png",
+    "outputs/bigram_freq.png",
+    "outputs/corpus_character_frequencies.txt",
+    "outputs/corpus_character_frequencies.png",
+    "data/tolkien.txt",
+    "data/machado_character_frequencies.txt",
+    "data/machado_character_frequencies.png",
+    "outputs/corpus_character_frequencies.md",
+    "corpus_character_frequencies.png.md",
+    "outputs/bigram_timing_heatmap.png",
+    "outputs/unigram_timing_heatmap.png",
+    "outputs/stats.txt",
+    "outputs/key_cost_analysis_a.png",
+    "outputs/heatmap.png",
+    "outputs/fitness.png",
+    "outputs/chart.png",
+    "Article_pt_BR.md",
+    "data/full_data.csv",
+    "scripts/analyze_key_cost.py",
+    "data/tolkien.txt~",
+    "data/typing_test.csv",
+    "data/synthetic_typing_full_uni_bi_fused.csv"
   ]
 }

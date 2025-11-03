@@ -8,6 +8,13 @@ Usage:
         --csv-json-col typing_data \
         --key a \
         --out outputs/key_cost_analysis_a.png
+
+    # With typing_test.csv merge:
+    python scripts/analyze_key_cost.py \
+        --csv data/other_data.csv \
+        --key e \
+        --mix-with-typing-test \
+        --out outputs/key_cost_analysis_e.png
 """
 
 from __future__ import annotations
@@ -31,6 +38,7 @@ parent_dir = os.path.dirname(script_dir)
 sys.path.insert(0, parent_dir)
 
 from ga_keyboard.layout import CANONICAL_47
+from ga_keyboard.typing_data import merge_typing_csvs
 
 
 def _safe_mean(values: List[float]) -> float:
@@ -166,6 +174,7 @@ def parse_args() -> argparse.Namespace:
 	p.add_argument("--csv", required=True, help="Path to CSV file with typing data")
 	p.add_argument("--csv-json-col", default="typing_data", help="Column name with JSON timing array")
 	p.add_argument("--key", required=True, help="Key to analyze (must be one of the 46 canonical keys)")
+	p.add_argument("--mix-with-typing-test", action="store_true", help="Merge with typing_test.csv before processing")
 	p.add_argument("--out", required=True, help="Output path for the bar chart PNG")
 	return p.parse_args()
 
@@ -179,8 +188,24 @@ def main() -> None:
 		print(f"Teclas válidas: {', '.join(CANONICAL_47)}")
 		sys.exit(1)
 	
-	print(f"Carregando dados de digitação de {args.csv}...")
-	avg_uni, avg_bi = parse_typing_csv(args.csv, args.csv_json_col)
+	# Merge with typing_test.csv if flag is set
+	csv_to_use = args.csv
+	temp_merged_path = None
+	if args.mix_with_typing_test:
+		typing_test_path = os.path.join(os.path.dirname(args.csv), "typing_test.csv")
+		if not os.path.exists(typing_test_path):
+			# Try in data directory
+			typing_test_path = os.path.join(parent_dir, "data", "typing_test.csv")
+		if os.path.exists(typing_test_path):
+			print(f"Misturando com typing_test.csv…")
+			temp_merged_path = merge_typing_csvs(args.csv, typing_test_path, args.csv_json_col)
+			csv_to_use = temp_merged_path
+			print(f"Dados de digitação mesclados prontos")
+		else:
+			print(f"Aviso: typing_test.csv não encontrado em {typing_test_path}, pulando mesclagem")
+	
+	print(f"Carregando dados de digitação de {csv_to_use}...")
+	avg_uni, avg_bi = parse_typing_csv(csv_to_use, args.csv_json_col)
 	print(f"Timings encontrados: {len(avg_uni)} unigramas, {len(avg_bi)} bigramas")
 	
 	print(f"Coletando combinações envolvendo a tecla '{args.key}'...")
@@ -203,6 +228,13 @@ def main() -> None:
 		print(f"  Unigrama: {uni_times[0]:.2f} ms")
 	if bi_times:
 		print(f"  Bigramas: min={min(bi_times):.2f} ms, max={max(bi_times):.2f} ms, média={sum(bi_times)/len(bi_times):.2f} ms")
+	
+	# Cleanup temporary merged file if created
+	if temp_merged_path and os.path.exists(temp_merged_path):
+		try:
+			os.remove(temp_merged_path)
+		except Exception:
+			pass
 
 
 if __name__ == "__main__":

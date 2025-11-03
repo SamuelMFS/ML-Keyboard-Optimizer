@@ -1,5 +1,3 @@
-t # Technical Overview: Genetic Algorithm for Keyboard Layout Optimization
-
 ## Abstract
 
 This document provides a comprehensive technical specification for a genetic algorithm-based system designed to optimize keyboard layouts based on empirical typing performance data. The system minimizes corpus typing time by evolving arrangements of 46 physical key symbols using measured unigram, bigram, and optional trigram timings. The implementation includes tournament selection, Order Crossover (OX), swap mutation, elitism, and visualization components for fitness evolution and per-key cost heatmaps.

@@ -7,7 +7,7 @@ from tqdm import tqdm
 from .layout import CANONICAL_47, DEFAULT_QWERTY_47, format_layout_ascii, layout_string
 from .typing_data import parse_typing_csv, merge_typing_csvs
 from .corpus import count_ngrams
-from .corpus_stats import count_corpus_characters
+from .corpus_stats import count_corpus_characters, plot_character_frequencies, plot_bigram_frequencies
 from .fitness import compute_cost, fitness_from_cost
 from .ga import init_population, evolve
 from .viz import (
@@ -78,7 +78,11 @@ def main() -> None:
 
 	print("Analisando frequências de caracteres do corpus…")
 	char_stats_path = os.path.join(args.outdir, "corpus_character_frequencies.txt")
+	char_chart_path = os.path.join(args.outdir, "corpus_character_frequencies.png")
+	bigram_chart_path = os.path.join(args.outdir, "corpus_bigram_frequencies.png")
 	count_corpus_characters(args.corpus, char_stats_path)
+	plot_character_frequencies(args.corpus, char_chart_path, top_n=50)
+	plot_bigram_frequencies(args.corpus, bigram_chart_path, top_n=50)
 
 	print("Inicializando população…")
 	population = init_population(args.population, seed=args.seed)
