@@ -41,6 +41,7 @@ De maneira simples, o projeto se trata da coleta te tempos de resposta de usuari
 ### 1. Gráfico de Frequência de Caracteres do Corpus
 
 **Arquivo**: [tabela](outputs/corpus_character_frequencies.txt)
+![Frequência de caracteres](outputs/corpus_character_frequencies.png)
 
 **O que mostra**: Frequência de ocorrência de cada caractere no corpus de texto utilizado para otimização.
 
