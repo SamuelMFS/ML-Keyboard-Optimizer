@@ -18,9 +18,9 @@ pip install -r requirements.txt
 
 ```bash
 python -m ga_keyboard.main \
-  --csv /home/xamu/dev/ML/data/typing.csv \
+  --csv /ML-Keyboard-Optimizer/data/typing.csv \
   --csv-json-col typing_data \
-  --corpus /home/xamu/dev/ML/data/corpus.txt \
+  --corpus /ML-Keyboard-Optimizer/data/corpus.txt \
   --generations 300 \
   --population 200 \
   --mutation-rate 0.1 \
