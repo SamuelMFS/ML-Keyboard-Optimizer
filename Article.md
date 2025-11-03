@@ -1,4 +1,4 @@
-# Technical Overview: Genetic Algorithm for Keyboard Layout Optimization
+t # Technical Overview: Genetic Algorithm for Keyboard Layout Optimization
 
 ## Abstract
 
@@ -20,6 +20,47 @@ A Genetic Algorithm (GA) searches the space of 46! possible permutations by:
 3. Evaluating candidate layouts via a weighted cost function using these distributions
 4. Evolving populations through selection, crossover, and mutation
 5. Preserving elite individuals to maintain search exploitation
+
+### 1.3 Search Space Complexity
+
+The search space consists of **46! = 55,026,221,598,120,889,498,503,054,288,002,548,929,616,517,529,600,000,000** (≈ **5.502622×10^55**) possible permutations. This number is **enormously** large:
+
+* **Scale comparison**: 46! is approximately **5.5×10^5** times larger than the estimated number of atoms on Earth (≈ 10^50).
+* **Terrestrial bounds**: It vastly exceeds the number of grains of sand on Earth (on the order of 10^18), yet remains smaller than the approximate number of atoms in the observable Universe (≈ 10^80).
+
+**Computational infeasibility**: Even with extremely generous assumptions, exhaustive enumeration is impossible:
+
+* Assume **10^10** active computing devices (10 billion devices, counting desktops, servers, mobile devices, IoT).
+* Each device performs **10^9** operations per second (1 GHz effective).
+* Age of the Universe ≈ **13.8 billion years** ≈ **4.3549×10^17** seconds.
+
+Total operations possible since the Big Bang:
+
+$$
+\text{total\_ops} = 10^{10} \times 10^{9} \times 4.3549 \times 10^{17} \approx 4.3549 \times 10^{36}
+$$
+
+Comparison with 46!:
+
+$$
+46! \approx 5.5026 \times 10^{55}
+$$
+
+$$
+\frac{46!}{\text{total\_ops}} \approx 1.26 \times 10^{19}
+$$
+
+**Conclusion**: Even with 10 billion devices running 1 billion operations per second each, continuously for the entire age of the Universe, approximately **1.26×10^19** times more operations would be needed to enumerate all permutations. In orders of magnitude, 46! is about **19 orders of magnitude** larger than the total operations possible in this scenario.
+
+**Alternative perspective**: Each device would need to execute approximately **1.26×10^28 operations per second** to complete all permutations within 13.8 billion years. Converting to clock frequency:
+
+$$
+\frac{1.26 \times 10^{28} \text{ ops/s}}{10^9 \text{ ops/s per GHz}} = 1.26 \times 10^{19} \text{ GHz}
+$$
+
+This equals approximately **12.6 quintillion GHz** (12,600,000,000,000,000,000 GHz). Compared to current market-leading processors, such as the Intel Core i9-14900K operating at up to **5.8 GHz** in boost mode, or the AMD Ryzen 9 7950X at **5.7 GHz**, the hypothetical device would need to be approximately **2.17×10^18 times faster**—over **2 quintillion times** faster than the most advanced commercial hardware available. This number is unattainable for any plausible technology, even considering future computational innovations.
+
+This computational impossibility motivates the use of heuristic search algorithms like genetic algorithms, which can discover high-quality solutions without exhaustive enumeration.
 
 ---
 
@@ -137,11 +178,9 @@ These frequencies represent the empirical probability mass function over n-grams
 
 The expected typing time for a corpus under layout `L` is computed as:
 
-```
-C(L) = Σᵢ f(uᵢ) · E[T|φ(uᵢ)] + 
-       Σⱼ f(bⱼ) · E[T|φ(bⱼ[0])φ(bⱼ[1])] + 
-       Σₖ f(tₖ) · E[T|φ(tₖ[0])φ(tₖ[1])φ(tₖ[2])]
-```
+$$
+C(L) = \sum_i f(u_i) \cdot E[T|\phi(u_i)] + \sum_j f(b_j) \cdot E[T|\phi(b_j[0])\phi(b_j[1])] + \sum_k f(t_k) \cdot E[T|\phi(t_k[0])\phi(t_k[1])\phi(t_k[2])]
+$$
 
 where:
 - `f(uᵢ)` is the frequency of unigram `uᵢ` in the corpus
@@ -151,9 +190,13 @@ where:
 - `E[T|sequence]` is the expected timing for a physical key sequence
 
 **Fitness Function**: Since GAs traditionally maximize fitness, we invert cost:
-```python
-fitness(L) = 1 / C(L)  if C(L) > 0 else 0
-```
+
+$$
+\text{fitness}(L) = \begin{cases} 
+1 / C(L) & \text{if } C(L) > 0 \\
+0 & \text{otherwise}
+\end{cases}
+$$
 
 Higher fitness corresponds to layouts with lower expected typing time.
 

@@ -11,12 +11,14 @@
             "id": "b0549c4fa326d183",
             "type": "leaf",
             "state": {
-              "type": "txt",
+              "type": "markdown",
               "state": {
-                "file": "outputs/best_layout.txt"
+                "file": "Article_pt_BR.md",
+                "mode": "preview",
+                "source": false
               },
               "icon": "lucide-file",
-              "title": "best_layout"
+              "title": "Article_pt_BR"
             }
           }
         ]
@@ -169,21 +171,23 @@
   },
   "active": "b0549c4fa326d183",
   "lastOpenFiles": [
+    "Article.md",
+    "data/README.md",
+    "outputs/unigram_timing_heatmap.png",
+    "outputs/best_layout.txt",
+    "outputs/bigram_timing_heatmap.png",
+    "outputs/corpus_character_frequencies.txt",
     "outputs/fitness.png",
     "outputs/heatmap.png",
     "Article_pt_BR.md",
+    "README.md",
     "data/synthetic_typing_full_uni_bi_fused.csv",
     "scripts/fuse_typing_csvs.py",
     "data/synthetic_typing_full_uni_bi_v3_noisy.csv",
     "data/synthetic_typing_full_uni_bi_v2_sameRowHeavy.csv",
     "data/synthetic_typing_full_uni_bi_v1.csv",
-    "README.md",
-    "data/README.md",
-    "Article.md",
     "requirements.txt",
-    "outputs/best_layout.txt",
     "data/typing_test.csv",
-    "data/typing test .csv",
-    "data/synthetic_typing_full_uni_bi.csv"
+    "data/typing test .csv"
   ]
 }

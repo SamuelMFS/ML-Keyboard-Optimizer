@@ -4,10 +4,17 @@ import os
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import seaborn as sns
 from .layout import CANONICAL_47, KEY_ROWS, format_layout_ascii
 
 TimingDicts = Tuple[Dict[str, float], Dict[str, float], Dict[str, float]]
+
+
+def _create_cyan_cmap():
+	"""Create a custom cyan colormap from light to dark."""
+	colors = ['#E0F7FA', '#B2EBF2', '#80DEEA', '#4DD0E1', '#26C6DA', '#00BCD4', '#00ACC1', '#0097A7']
+	return mcolors.LinearSegmentedColormap.from_list('cyan_gradient', colors, N=256)
 
 
 def per_key_cost_approx(
@@ -110,6 +117,108 @@ def ascii_sparkline(values: List[float], width: int = 60) -> str:
 
 def ascii_layout(layout: List[str]) -> str:
 	return format_layout_ascii(layout)
+
+
+def plot_unigram_timing_heatmap(timings: TimingDicts, out_path: str) -> None:
+	"""Plot heatmap of average unigram timing per physical key."""
+	avg_uni, _, _ = timings
+	cyan_cmap = _create_cyan_cmap()
+	
+	# Build grid with unigram times per key
+	grid: List[List[float]] = []
+	for indices in KEY_ROWS:
+		row_vals = []
+		for idx in indices:
+			k = CANONICAL_47[idx]
+			time = avg_uni.get(k, float('nan'))
+			row_vals.append(time)
+		grid.append(row_vals)
+	
+	# Pad rows to max length
+	max_len = max(len(r) for r in grid) if grid else 0
+	padded = [r + [float('nan')] * (max_len - len(r)) for r in grid]
+	arr = np.array(padded, dtype=float)
+	
+	plt.figure(figsize=(10, 4))
+	# Format annotations: show values with 1 decimal place, use 'nan' for missing
+	annot_arr = np.empty_like(arr, dtype=object)
+	for i in range(arr.shape[0]):
+		for j in range(arr.shape[1]):
+			if np.isnan(arr[i, j]):
+				annot_arr[i, j] = ''
+			else:
+				annot_arr[i, j] = f'{arr[i, j]:.1f}'
+	
+	sns.heatmap(arr, annot=annot_arr, fmt='', cmap=cyan_cmap, cbar_kws={'label': 'Time (ms)'},
+	            annot_kws={'size': 8})
+	plt.title("Average Unigram Timing per Key")
+	plt.tight_layout()
+	os.makedirs(os.path.dirname(out_path), exist_ok=True)
+	plt.savefig(out_path)
+	plt.close()
+
+
+def plot_bigram_timing_heatmap(timings: TimingDicts, out_path: str) -> None:
+	"""Plot heatmap of average bigram timing per physical key.
+	
+	For each key, computes the average of all bigrams where that key appears
+	(either as first or second character).
+	"""
+	avg_uni, avg_bi, _ = timings
+	cyan_cmap = _create_cyan_cmap()
+	
+	# For each physical key, collect all bigram timings where it appears
+	key_bigram_times: Dict[str, List[float]] = {k: [] for k in CANONICAL_47}
+	
+	for bigram_key, time in avg_bi.items():
+		if len(bigram_key) != 2:
+			continue
+		p1, p2 = bigram_key[0], bigram_key[1]
+		if p1 in key_bigram_times:
+			key_bigram_times[p1].append(time)
+		if p2 in key_bigram_times:
+			key_bigram_times[p2].append(time)
+	
+	# Compute average per key
+	key_avg_bigram: Dict[str, float] = {}
+	for k, times in key_bigram_times.items():
+		if times:
+			key_avg_bigram[k] = sum(times) / len(times)
+		else:
+			key_avg_bigram[k] = float('nan')
+	
+	# Build grid
+	grid: List[List[float]] = []
+	for indices in KEY_ROWS:
+		row_vals = []
+		for idx in indices:
+			k = CANONICAL_47[idx]
+			time = key_avg_bigram.get(k, float('nan'))
+			row_vals.append(time)
+		grid.append(row_vals)
+	
+	# Pad rows to max length
+	max_len = max(len(r) for r in grid) if grid else 0
+	padded = [r + [float('nan')] * (max_len - len(r)) for r in grid]
+	arr = np.array(padded, dtype=float)
+	
+	plt.figure(figsize=(10, 4))
+	# Format annotations: show values with 1 decimal place, use 'nan' for missing
+	annot_arr = np.empty_like(arr, dtype=object)
+	for i in range(arr.shape[0]):
+		for j in range(arr.shape[1]):
+			if np.isnan(arr[i, j]):
+				annot_arr[i, j] = ''
+			else:
+				annot_arr[i, j] = f'{arr[i, j]:.1f}'
+	
+	sns.heatmap(arr, annot=annot_arr, fmt='', cmap=cyan_cmap, cbar_kws={'label': 'Time (ms)'},
+	            annot_kws={'size': 8})
+	plt.title("Average Bigram Timing per Key")
+	plt.tight_layout()
+	os.makedirs(os.path.dirname(out_path), exist_ok=True)
+	plt.savefig(out_path)
+	plt.close()
 
 
 

@@ -62,9 +62,13 @@ def build_records(
     }
 
     def jitter(x: float) -> float:
-        if noise_std <= 0:
-            return x
-        return x + random.gauss(0.0, noise_std)
+        # Always add small uniform random jitter to break step patterns
+        small_jitter = random.uniform(-0.15, 0.15)
+        val = x + small_jitter
+        # Add Gaussian noise if specified
+        if noise_std > 0:
+            val += random.gauss(0.0, noise_std)
+        return val
 
     def unigram_time_ms(idx: int) -> float:
         r = ROW_OF_INDEX[idx]
@@ -73,7 +77,7 @@ def build_records(
         center = row_center_col(r)
         lateral = abs(col - center) * col_penalty_per_step
         val = base + lateral
-        return round(max(60.0, val), 2)  # clamp to sensible minimum
+        return max(60.0, val)  # clamp to sensible minimum
 
     def bigram_time_ms(i1: int, i2: int) -> float:
         t = unigram_time_ms(i1) + unigram_time_ms(i2)
@@ -82,7 +86,7 @@ def build_records(
         else:
             r1, r2 = ROW_OF_INDEX[i1], ROW_OF_INDEX[i2]
             t += same_row_penalty if r1 == r2 else diff_row_penalty
-        return round(max(80.0, t), 2)
+        return max(80.0, t)
 
     records: List[Dict] = []
     # Unigrams

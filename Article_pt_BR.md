@@ -10,7 +10,7 @@ Este documento fornece uma especificação técnica abrangente de um sistema bas
 
 ### 1.1 Problema
 
-Layouts tradicionais de teclado (por exemplo, QWERTY) foram projetados para restrições mecânicas e não foram otimizados para entrada digital moderna. O desempenho atual de digitação pode ser medido empiricamente em granularidade de sub-segundo, permitindo a otimização orientada a dados de arranjos de teclas. O objetivo é descobrir uma permutação de 46 teclas físicas que minimize o tempo de digitação esperado para um dado corpus de texto, condicionado às distribuições de tempo observadas para teclas únicas, pares de teclas e, opcionalmente, trincas de teclas.
+Layouts tradicionais de teclado (por exemplo, QWERTY) foram projetados com restrições *mecânicas* e não foram otimizados para entrada digital moderna. O desempenho atual de digitação pode ser medido empiricamente em granularidade de sub-segundo, permitindo a otimização orientada a dados de arranjos de teclas. O objetivo é descobrir uma permutação de 46 teclas físicas que minimize o tempo de digitação esperado para um dado corpus de texto, condicionado às distribuições de tempo observadas para teclas únicas, pares de teclas e, opcionalmente, trincas de teclas.
 
 ### 1.2 Visão Geral da Abordagem
 
@@ -20,6 +20,47 @@ Um Algoritmo Genético (AG) busca no espaço de 46! permutações possíveis por
 3. Avaliação de layouts candidatos via função de custo ponderada usando essas distribuições
 4. Evolução de populações através de seleção, recombinação (crossover) e mutação
 5. Preservação de indivíduos de elite para manter a exploração de boas soluções
+
+### 1.3 Complexidade do Espaço de Busca
+
+O espaço de busca consiste em **46! = 55.026.221.598.120.889.498.503.054.288.002.548.929.616.517.529.600.000.000** (≈ **5,502622×10^55**) permutações possíveis. Esse número é **enormemente** grande:
+
+* **Comparação de escala**: 46! é aproximadamente **5,5×10^5** vezes maior que o número estimado de átomos na Terra (≈ 10^50).
+* **Limites terrestres**: Supera amplamente o número de grãos de areia na Terra (ordem de 10^18), mas permanece menor que o número aproximado de átomos no Universo observável (≈ 10^80).
+
+**Inviabilidade computacional**: Mesmo com hipóteses extremamente generosas, a enumeração exaustiva é impossível:
+
+* Assuma **10^10** dispositivos computacionais ativos (10 bilhões de dispositivos, contando desktops, servidores, dispositivos móveis, IoT).
+* Cada dispositivo executa **10^9** operações por segundo (1 GHz efetivo).
+* Idade do Universo ≈ **13,8 bilhões de anos** ≈ **4,3549×10^17** segundos.
+
+Total de operações possíveis desde o Big Bang:
+
+$$
+\text{total\_ops} = 10^{10} \times 10^{9} \times 4{,}3549 \times 10^{17} \approx 4{,}3549 \times 10^{36}
+$$
+
+Comparação com 46!:
+
+$$
+46! \approx 5{,}5026 \times 10^{55}
+$$
+
+$$
+\frac{46!}{\text{total\_ops}} \approx 1{,}26 \times 10^{19}
+$$
+
+**Conclusão**: Mesmo com 10 bilhões de dispositivos executando 1 bilhão de operações por segundo cada, continuamente durante toda a idade do Universo, aproximadamente **1,26×10^19** vezes mais operações seriam necessárias para enumerar todas as permutações. Em ordens de grandeza, 46! é cerca de **19 ordens de grandeza** maior que o total de operações possíveis nesse cenário.
+
+**Perspectiva alternativa**: Cada dispositivo precisaria executar aproximadamente **1,26×10^28 operações por segundo** para completar todas as permutações em 13,8 bilhões de anos. Convertendo para frequência de clock:
+
+$$
+\frac{1{,}26 \times 10^{28} \text{ ops/s}}{10^9 \text{ ops/s por GHz}} = 1{,}26 \times 10^{19} \text{ GHz}
+$$
+
+Isso equivale a aproximadamente **12,6 quintilhões de GHz** (12.600.000.000.000.000.000 GHz). Comparado com os melhores processadores de mercado atuais, como o Intel Core i9-14900K que opera a até **5,8 GHz** em boost, ou o AMD Ryzen 9 7950X a **5,7 GHz**, o dispositivo hipotético precisaria ser cerca de **2,17×10^18 vezes mais rápido**—ou seja, mais de **2 quintilhões de vezes** mais rápido que o hardware comercial mais avançado disponível. Este número é inatingível para qualquer tecnologia plausível, mesmo considerando futuras inovações computacionais.
+
+Esta impossibilidade computacional motiva o uso de algoritmos heurísticos de busca como algoritmos genéticos, que podem descobrir soluções de alta qualidade sem enumeração exaustiva.
 
 ---
 
@@ -137,11 +178,9 @@ Essas frequências representam a função de massa de probabilidade empírica so
 
 O tempo esperado de digitação para um corpus sob um layout `L` é computado como:
 
-```
-C(L) = Σᵢ f(uᵢ) · E[T|φ(uᵢ)] + 
-       Σⱼ f(bⱼ) · E[T|φ(bⱼ[0])φ(bⱼ[1])] + 
-       Σₖ f(tₖ) · E[T|φ(tₖ[0])φ(tₖ[1])φ(tₖ[2])]
-```
+$$
+C(L) = \sum_i f(u_i) \cdot E[T|\phi(u_i)] + \sum_j f(b_j) \cdot E[T|\phi(b_j[0])\phi(b_j[1])] + \sum_k f(t_k) \cdot E[T|\phi(t_k[0])\phi(t_k[1])\phi(t_k[2])]
+$$
 
 onde:
 - `f(uᵢ)` é a frequência do unigrama `uᵢ` no corpus
@@ -151,9 +190,13 @@ onde:
 - `E[T|sequence]` é o tempo esperado para uma sequência de teclas físicas
 
 **Função de Fitness**: Como AGs tradicionalmente maximizam fitness, invertemos o custo:
-```python
-fitness(L) = 1 / C(L)  if C(L) > 0 else 0
-```
+
+$$
+\text{fitness}(L) = \begin{cases} 
+1 / C(L) & \text{se } C(L) > 0 \\
+0 & \text{caso contrário}
+\end{cases}
+$$
 
 Maior fitness corresponde a layouts com menor tempo esperado de digitação.
 
