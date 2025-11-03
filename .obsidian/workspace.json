@@ -4,19 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "c44dc0bf5853e0ef",
+        "id": "975f542fb0e1ac66",
         "type": "tabs",
         "children": [
           {
-            "id": "cb118db68d3b9df4",
+            "id": "814b5507217e2286",
             "type": "leaf",
             "state": {
-              "type": "image",
-              "state": {
-                "file": "outputs/unigram_timing_heatmap.png"
-              },
-              "icon": "lucide-image",
-              "title": "unigram_timing_heatmap"
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           }
         ]
@@ -167,23 +165,25 @@
       "bases:Create new base": false
     }
   },
-  "active": "cb118db68d3b9df4",
+  "active": "814b5507217e2286",
   "lastOpenFiles": [
-    "outputs/bigram_timing_heatmap.png",
-    "outputs/bigram_freq.png",
-    "outputs/chart.png",
-    "outputs/unigram_timing_heatmap.png",
-    "README.md",
-    "data/README.md",
+    "outputs/best_layout.txt",
     "Apresetacao.md",
     "Article.md",
-    "outputs/best_layout.txt",
-    "outputs/corpus_bigram_frequencies.png",
+    "data/README.md",
+    "data/machado.txt",
+    "data/machado_character_frequencies.png",
+    "data/machado_character_frequencies.txt",
+    "data/synthetic_typing_full_uni_bi.csv",
+    "outputs/chart.png",
     "outputs/corpus_character_frequencies.txt",
+    "outputs/unigram_timing_heatmap.png",
+    "outputs/bigram_timing_heatmap.png",
+    "outputs/bigram_freq.png",
+    "README.md",
+    "outputs/corpus_bigram_frequencies.png",
     "outputs/corpus_character_frequencies.png",
     "data/tolkien.txt",
-    "data/machado_character_frequencies.txt",
-    "data/machado_character_frequencies.png",
     "outputs/corpus_character_frequencies.md",
     "corpus_character_frequencies.png.md",
     "outputs/stats.txt",
@@ -193,8 +193,6 @@
     "Article_pt_BR.md",
     "data/full_data.csv",
     "scripts/analyze_key_cost.py",
-    "data/tolkien.txt~",
-    "data/typing_test.csv",
-    "data/synthetic_typing_full_uni_bi_fused.csv"
+    "data/tolkien.txt~"
   ]
 }

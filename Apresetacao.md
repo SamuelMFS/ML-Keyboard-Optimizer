@@ -30,7 +30,7 @@ python -m ga_keyboard.corpus_stats \
 
 1. **Contexto**: "Este gráfico mostra a distribuição de frequência dos caracteres no nosso corpus. Usamos textos de Machado de Assis como representativo do português brasileiro."
 2. **Observação chave**: "Note que as vogais (a, e, i, o, u) aparecem no topo—isso significa que otimizar essas teclas terá impacto significativo no tempo total de digitação."
-3. **Conclusão**: "O corpus contém [X] caracteres únicos e [Y] caracteres totais, fornecendo uma base estatística robusta para otimização."
+3. **Conclusão**: "O corpus contém *40* caracteres únicos e *~5.000.000* caracteres totais, fornecendo uma base estatística robusta para otimização."
 
 ---
 
@@ -58,7 +58,6 @@ python -m ga_keyboard.main \
 1. **Contexto**: "Este heatmap mostra os tempos médios medidos empiricamente para pressionar cada tecla física. Os dados foram coletados através da plataforma BagreType, onde participantes digitaram caracteres individuais."
 2. **Cores e valores**: "Cores mais escuras (valores maiores no gráfico) indicam teclas mais lentas. Veja que os números na primeira fileira tendem a ser mais lentos que as letras da home row."
 3. **Validação**: "Isso faz sentido ergonomicamente: a home row é onde os dedos repousam naturalmente, então essas teclas são mais rápidas de acessar."
-4. **Dados coletados**: "Temos [X] medições de unigramas, coletadas de [Y] participantes através de [bagretype.com](https://bagretype.com)."
 
 ---
 
@@ -139,7 +138,7 @@ python scripts/analyze_key_cost.py \
 - Mostra a taxa de melhoria
 - Identifica se mais gerações seriam benéficas (plateau sugere convergência)
 
-**Comando para gerar** (gerado automaticamente pelo main):
+**Comando para gerar** :
 ```bash
 python -m ga_keyboard.main \
   --csv data/typing_test.csv \
@@ -157,7 +156,6 @@ python -m ga_keyboard.main \
 4. **Parâmetros**: "Usamos população de 200, taxa de mutação de 10%, taxa de crossover de 70% e preservamos os 5 melhores indivíduos (elitismo)."
 
 ---
-
 ### 6. Heatmap de Custo por Tecla do Layout Evoluído
 
 **Arquivo**: `outputs/heatmap.png`
@@ -170,7 +168,7 @@ python -m ga_keyboard.main \
 - Compara com o QWERTY para validar melhorias
 - Mostra como o algoritmo distribuiu caracteres frequentes em teclas rápidas
 
-**Comando para gerar** (gerado automaticamente pelo main):
+**Comando para gerar** :
 ```bash
 # Mesmo comando do fitness - o heatmap é gerado automaticamente
 python -m ga_keyboard.main \
@@ -235,142 +233,14 @@ python -m ga_keyboard.main \
 
 **Exemplo de output**:
 ```
-Melhor custo: 467,331,785.37 ms
-Custo da linha de base (QWERTY): 1,683,987,471.27 ms
-Melhoria sobre QWERTY: 72.25%
+Melhor custo: 756,338,504.46 ms
+Custo da linha de base (QWERTY): 834,945,898.00 ms
+Melhoria sobre QWERTY: 9.41%
 ```
 
-1. **Resultado quantitativo**: "O layout evoluído reduz o tempo estimado de digitação em [72%] comparado ao QWERTY para o corpus de português."
-2. **Significado prático**: "Para um texto de 1 milhão de caracteres, isso representa uma economia de aproximadamente [X] minutos."
-3. **Validação**: "Este resultado é baseado em dados empíricos reais coletados de [Y] participantes, não em estimativas teóricas."
+1. **Resultado quantitativo**: "O layout evoluído reduz o tempo estimado de digitação em [9.41%] comparado ao QWERTY para o corpus de português."
 
 ---
-
-##  Roteiro Completo de Apresentação
-
-**Pontos-chave**:
-- Apresentar o problema: layouts tradicionais (QWERTY) não foram otimizados para digitação moderna
-- Objetivo: usar dados empíricos e algoritmos genéticos para descobrir layouts otimizados
-- Diferencial: dados reais coletados via [bagretype.com](https://bagretype.com), não estimativas teóricas
-
----
-
-### 2. Coleta de Dados (3-4 minutos)
-
-- **Heatmap de unigramas**: `unigram_timing_heatmap.png`
-![Frequência de caracteres](outputs/unigram_timing_heatmap.png)
-- **Heatmap de bigramas**: `bigram_timing_heatmap.png`
-![Frequência de caracteres](outputs/bigram_timing_heatmap.png)
-**Gráficos a mostrar**:
-- **Frequência de caracteres**: `corpus_character_frequencies.png`
-![Frequência de caracteres](data/machado_character_frequencies.png)
-
-1. **Corpus**: "Usamos textos de Machado de Assis como representativo do português brasileiro. O gráfico de frequência mostra que vogais dominam, o que faz sentido para português."
-2. **Dados empíricos**: "Os heatmaps mostram tempos medidos de participantes reais. Note que a home row (fileira central) é mais rápida."
-3. **Volume**: "*~2500* medições de *~1800* participantes através da plataforma BagreType."
-
-**Comandos para regenerar**:
-```bash
-# Frequência de caracteres
-python -m ga_keyboard.corpus_stats --corpus data/machado.txt --out-png outputs/corpus_chars.png
-
-# Heatmaps (gerados automaticamente no main)
-python -m ga_keyboard.main --csv data/typing_test.csv --corpus data/machado.txt --generations 1 --population 10
-```
-
----
-
-### 3. Algoritmo Genético (2-3 minutos)
-
-**Gráficos a mostrar**:
-- **Evolução da aptidão**: `fitness.png`
-![Frequência de caracteres](outputs/fitness.png)
-
-**Pontos a destacar**:
-1. **Espaço de busca**: "46! permutações possíveis—impossível enumerar exaustivamente. Algoritmos genéticos são necessários."
-2. **Convergência**: "O gráfico de fitness mostra que o algoritmo melhora rapidamente nas primeiras gerações e converge após *~100* gerações."
-3. **Parâmetros**: "População de 200, seleção por torneio, crossover OX, mutação por troca, elitismo de 5 indivíduos."
-
-**Comando para regenerar**:
-```bash
-python -m ga_keyboard.main \
-  --csv data/typing_test.csv \
-  --corpus data/machado.txt \
-  --generations 300 \
-  --population 200
-```
-
----
-
-### 4. Resultados (3-4 minutos)
-
-**Gráficos a mostrar**:
-- **Layout evoluído (ASCII)**: [bestLayout](outputs/best_layout.txt)
-- **Heatmap de custo**: ![Frequência de caracteres](outputs/heatmap.png)
-
-**Pontos a destacar**:
-1. **Layout resultante**: "O algoritmo descobriu um layout que reduz o tempo de digitação em *~13%* comparado ao QWERTY."
-2. **Distribuição de custos**: "O heatmap mostra que caracteres frequentes foram colocados em teclas rápidas (cores claras)."
-3. **Validação**: "Para um texto de 1 milhão de caracteres, isso representa economia de *~1.833* minutos."
-
-**Comandos para regenerar**:
-```bash
-# Layout e heatmap (gerado pelo main)
-python -m ga_keyboard.main --csv data/typing_test.csv --corpus data/machado.txt
-
-# Análise de tecla específica
-python scripts/analyze_key_cost.py --csv data/typing_test.csv --key a --out outputs/key_a.png
-```
-
----
-
-### 5. Conclusão e Trabalhos Futuros (1-2 minutos)
-
-**Pontos-chave**:
-- Sistema funcional que otimiza layouts baseado em dados empíricos
-- Resultados promissores: *10%* ou mais de melhoria sobre QWERTY
-
----
-
-##  Comandos Rápidos de Referência
-
-### Gerar todos os gráficos principais:
-
-```bash
-# 1. Análise do corpus
-python -m ga_keyboard.corpus_stats \
-  --corpus data/machado.txt \
-  --out-png outputs/corpus_chars.png
-
-# 2. Otimização completa (gera heatmaps, fitness, layout)
-python -m ga_keyboard.main \
-  --csv data/typing_test.csv \
-  --csv-json-col typing_data \
-  --corpus data/machado.txt \
-  --generations 300 \
-  --population 200 \
-  --mutation-rate 0.1 \
-  --crossover-rate 0.7 \
-  --elitism 5 \
-  --cost-order bi \
-  --fallback-to-unigrams false
-
-# 3. Análise de tecla específica (exemplo: 'a')
-python scripts/analyze_key_cost.py \
-  --csv data/typing_test.csv \
-  --key a \
-  --out outputs/key_cost_analysis_a.png
-
-# 4. Análise com mesclagem de dados
-python scripts/analyze_key_cost.py \
-  --csv data/other_data.csv \
-  --key e \
-  --mix-with-typing-test \
-  --out outputs/key_cost_analysis_e.png
-```
-
----
-
 ##  Pontos para Perguntas da Audiência
 
 ### "Por que o layout fica esquisito?"
