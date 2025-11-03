@@ -94,6 +94,64 @@ CANONICAL_46 = ["1","2","3","4","5","6","7","8","9","0","-","=",
 
 This mapping enables the cost function to retrieve timing statistics for transitions in the evolved layout.
 
+#### 2.1.1 Understanding the Logical-to-Physical Mapping
+
+The mapping `φ` is fundamental to understanding how the system evaluates layouts. Conceptually:
+
+* **Logical characters (C)**: The letters and symbols that appear in the corpus text (e.g., `'a'`, `'b'`, `'t'`, `'h'`).
+* **Physical keys (P)**: The fixed positions on the keyboard identified by their canonical symbol (e.g., "position where 'q' is", "position where 'a' is").
+
+**Practical example - QWERTY layout**:
+
+In the standard QWERTY layout, we have the correspondence:
+
+| Physical position (index) | Physical key (CANONICAL_46) | Logical symbol (layout L) |
+|---------------------------|----------------------------|---------------------------|
+| 0 | `'1'` | `'1'` |
+| 12 | `'q'` | `'q'` |
+| 25 | `'a'` | `'a'` |
+
+Thus, in QWERTY: `φ('a') = 'a'` (the logical character `'a'` is at the physical key `'a'`).
+
+**Practical example - Evolved layout**:
+
+Consider an evolved layout from the genetic algorithm where:
+- The logical character `'a'` was placed at the physical position of `'q'` (index 12)
+- The logical character `'q'` was placed at the physical position of `'a'` (index 25)
+
+In this case:
+- `φ('a') = 'q'` (the logical character `'a'` is at the physical key `'q'`, position 12)
+- `φ('q') = 'a'` (the logical character `'q'` is at the physical key `'a'`, position 25)
+
+**Why this matters**:
+
+When the system calculates the expected typing time for a text, it needs to know:
+
+1. **Where each letter is physically located**: Timings are measured between *physical positions* on the keyboard, not between specific letters. For example, the time to press the key at the `'q'` position may differ from the time at the `'a'` position due to biomechanical differences.
+
+2. **Which pairs of keys are pressed in sequence**: If in the evolved layout the logical bigram `"th"` maps to physical keys `'f'` and `'y'`, then the system queries the measured time for the physical transition `"fy"`, not `"th"`.
+
+**Concrete example**:
+
+Suppose that in the evolved layout:
+- Logical `'t'` is at physical key `'f'` → `φ('t') = 'f'`
+- Logical `'h'` is at physical key `'y'` → `φ('h') = 'y'`
+
+To calculate the cost of typing the bigram `"th"` in the corpus:
+1. The system identifies that `"th"` appears in the text with frequency `f("th")`.
+2. Applies the mapping: `φ('t') = 'f'` and `φ('h') = 'y'`.
+3. Queries the average measured time for the physical bigram `"fy"`: `E[T|"fy"]`.
+4. Contributes `f("th") × E[T|"fy"]` to the total cost.
+
+**Conceptual summary**:
+
+| Term | Meaning |
+|------|---------|
+| **Logical character** | The letter/symbol that appears in the corpus text (e.g., `'a'`, `'b'`, `'t'`) |
+| **Physical key** | The fixed position on the keyboard identified by its canonical symbol (e.g., position of `'q'`) |
+| **φ (phi)** | Function that maps each logical character to its physical key in layout `L` |
+| **Practical use** | Converts the corpus text into a sequence of physical positions and calculates typing time based on measured timings for those physical transitions |
+
 ### 2.2 Timing Data Structure
 
 **Raw Input Format**: Timing data is provided as JSON arrays within a CSV column. Each entry contains:

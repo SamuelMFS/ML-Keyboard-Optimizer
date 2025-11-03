@@ -11,10 +11,14 @@
             "id": "31ea2459665871da",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Article_pt_BR.md",
+                "mode": "preview",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Article_pt_BR"
             }
           }
         ]
@@ -167,6 +171,7 @@
   },
   "active": "31ea2459665871da",
   "lastOpenFiles": [
+    "data/typing_test.csv",
     "outputs/bigram_timing_heatmap.png",
     "outputs/unigram_timing_heatmap.png",
     "Article_pt_BR.md",
@@ -183,7 +188,6 @@
     "data/synthetic_typing_full_uni_bi_v2_sameRowHeavy.csv",
     "data/synthetic_typing_full_uni_bi_v1.csv",
     "requirements.txt",
-    "data/typing_test.csv",
     "data/typing test .csv"
   ]
 }

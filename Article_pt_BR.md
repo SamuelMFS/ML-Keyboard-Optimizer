@@ -68,7 +68,7 @@ Esta impossibilidade computacional motiva o uso de algoritmos heurísticos de bu
 
 ### 2.1 Representação do Layout de Teclado
 
-**Espaço de Teclas Físicas**: O sistema opera sobre 46 caracteres distintos organizados em quatro fileiras defasadas:
+**Espaço de Teclas Físicas**: O sistema opera sobre 46 caracteres distintos organizados em quatro fileiras staggered:
 
 ```
 Row 1 (numbers):     1  2  3  4  5  6  7  8  9  0  -  =
@@ -93,6 +93,64 @@ CANONICAL_46 = ["1","2","3","4","5","6","7","8","9","0","-","=",
 - Na posição `i`, o símbolo lógico `L[i]` mapeia para a tecla física `CANONICAL_46[i]`
 
 Esse mapeamento permite que a função de custo compute estatísticas de tempo para transições no layout evoluído.
+
+#### 2.1.1 Compreendendo o Mapeamento Lógico→Físico
+
+O mapeamento `φ` é fundamental para entender como o sistema avalia layouts. Conceitualmente:
+
+* **Caracteres lógicos (C)**: As letras e símbolos que aparecem no texto do corpus (ex.: `'a'`, `'b'`, `'t'`, `'h'`).
+* **Teclas físicas (P)**: As posições fixas no teclado identificadas pelo símbolo canônico associado (ex.: "posição onde está o 'q'", "posição onde está o 'a'").
+
+**Exemplo prático - Layout QWERTY**:
+
+No layout QWERTY padrão, temos a correspondência:
+
+| Posição física (índice) | Tecla física (CANONICAL_46) | Símbolo lógico (layout L) |
+|------------------------|----------------------------|--------------------------|
+| 0 | `'1'` | `'1'` |
+| 12 | `'q'` | `'q'` |
+| 25 | `'a'` | `'a'` |
+
+Assim, no QWERTY: `φ('a') = 'a'` (o caractere lógico `'a'` está na tecla física `'a'`).
+
+**Exemplo prático - Layout evoluído**:
+
+Considere um layout evoluído pelo algoritmo genético onde:
+- O caractere lógico `'a'` foi colocado na posição física do `'q'` (índice 12)
+- O caractere lógico `'q'` foi colocado na posição física do `'a'` (índice 25)
+
+Neste caso:
+- `φ('a') = 'q'` (o caractere lógico `'a'` está na tecla física `'q'`, posição 12)
+- `φ('q') = 'a'` (o caractere lógico `'q'` está na tecla física `'a'`, posição 25)
+
+**Por que isso importa**:
+
+Quando o sistema calcula o tempo esperado de digitação de um texto, ele precisa saber:
+
+1. **Onde cada letra está fisicamente**: Os tempos são medidos entre *posições físicas* do teclado, não entre letras específicas. Por exemplo, o tempo para pressionar a tecla na posição do `'q'` pode ser diferente do tempo para a posição do `'a'` devido a diferenças biomecânicas.
+
+2. **Quais pares de teclas são pressionados em sequência**: Se no layout evoluído o bigrama lógico `"th"` mapeia para as teclas físicas `'f'` e `'y'`, então o sistema consulta o tempo medido para a transição física `"fy"`, não `"th"`.
+
+**Exemplo concreto**:
+
+Suponha que no layout evoluído:
+- `'t'` lógico está na tecla física `'f'` → `φ('t') = 'f'`
+- `'h'` lógico está na tecla física `'y'` → `φ('h') = 'y'`
+
+Para calcular o custo de digitar o bigrama `"th"` no corpus:
+1. O sistema identifica que `"th"` aparece no texto com frequência `f("th")`.
+2. Aplica o mapeamento: `φ('t') = 'f'` e `φ('h') = 'y'`.
+3. Consulta o tempo médio medido para o bigrama físico `"fy"`: `E[T|"fy"]`.
+4. Contribui com `f("th") × E[T|"fy"]` para o custo total.
+
+**Resumo conceitual**:
+
+| Termo | Significado |
+|-------|-------------|
+| **Caractere lógico** | A letra/símbolo que aparece no texto do corpus (ex.: `'a'`, `'b'`, `'t'`) |
+| **Tecla física** | A posição fixa no teclado identificada pelo símbolo canônico (ex.: posição do `'q'`) |
+| **φ (phi)** | Função que mapeia cada caractere lógico para sua tecla física no layout `L` |
+| **Uso prático** | Converte o texto do corpus em uma sequência de posições físicas e calcula o tempo de digitação baseado nos tempos medidos para essas transições físicas |
 
 ### 2.2 Estrutura dos Dados de Tempo
 
