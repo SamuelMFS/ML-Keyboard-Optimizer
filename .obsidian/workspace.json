@@ -11,14 +11,12 @@
             "id": "cb118db68d3b9df4",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "image",
               "state": {
-                "file": "Apresetacao.md",
-                "mode": "preview",
-                "source": false
+                "file": "outputs/unigram_timing_heatmap.png"
               },
-              "icon": "lucide-file",
-              "title": "Apresetacao"
+              "icon": "lucide-image",
+              "title": "unigram_timing_heatmap"
             }
           }
         ]
@@ -171,13 +169,16 @@
   },
   "active": "cb118db68d3b9df4",
   "lastOpenFiles": [
-    "Article.md",
-    "Apresetacao.md",
-    "outputs/best_layout.txt",
+    "outputs/bigram_timing_heatmap.png",
+    "outputs/bigram_freq.png",
+    "outputs/chart.png",
+    "outputs/unigram_timing_heatmap.png",
     "README.md",
     "data/README.md",
+    "Apresetacao.md",
+    "Article.md",
+    "outputs/best_layout.txt",
     "outputs/corpus_bigram_frequencies.png",
-    "outputs/bigram_freq.png",
     "outputs/corpus_character_frequencies.txt",
     "outputs/corpus_character_frequencies.png",
     "data/tolkien.txt",
@@ -185,13 +186,10 @@
     "data/machado_character_frequencies.png",
     "outputs/corpus_character_frequencies.md",
     "corpus_character_frequencies.png.md",
-    "outputs/bigram_timing_heatmap.png",
-    "outputs/unigram_timing_heatmap.png",
     "outputs/stats.txt",
     "outputs/key_cost_analysis_a.png",
     "outputs/heatmap.png",
     "outputs/fitness.png",
-    "outputs/chart.png",
     "Article_pt_BR.md",
     "data/full_data.csv",
     "scripts/analyze_key_cost.py",
