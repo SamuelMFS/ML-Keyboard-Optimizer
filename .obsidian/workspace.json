@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "100d58b870a6272a",
+        "id": "407acb4d5013859c",
         "type": "tabs",
         "children": [
           {
-            "id": "b0549c4fa326d183",
+            "id": "31ea2459665871da",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Article_pt_BR.md",
-                "mode": "preview",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Article_pt_BR"
+              "title": "New tab"
             }
           }
         ]
@@ -169,17 +165,17 @@
       "bases:Create new base": false
     }
   },
-  "active": "b0549c4fa326d183",
+  "active": "31ea2459665871da",
   "lastOpenFiles": [
+    "outputs/bigram_timing_heatmap.png",
+    "outputs/unigram_timing_heatmap.png",
+    "Article_pt_BR.md",
     "Article.md",
     "data/README.md",
-    "outputs/unigram_timing_heatmap.png",
     "outputs/best_layout.txt",
-    "outputs/bigram_timing_heatmap.png",
     "outputs/corpus_character_frequencies.txt",
     "outputs/fitness.png",
     "outputs/heatmap.png",
-    "Article_pt_BR.md",
     "README.md",
     "data/synthetic_typing_full_uni_bi_fused.csv",
     "scripts/fuse_typing_csvs.py",
