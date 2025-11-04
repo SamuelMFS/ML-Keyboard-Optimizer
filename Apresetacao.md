@@ -88,7 +88,6 @@ python -m ga_keyboard.main \
 
 1. **Contexto**: "Este heatmap mostra os tempos médios medidos empiricamente para pressionar cada tecla física. Os dados foram coletados através da plataforma BagreType, onde participantes digitaram caracteres individuais."
 2. **Cores e valores**: "Cores mais escuras (valores maiores no gráfico) indicam teclas mais lentas. Veja que os números na primeira fileira tendem a ser mais lentos que as letras da home row."
-3. **Validação**: "Isso faz sentido ergonomicamente: a home row é onde os dedos repousam naturalmente, então essas teclas são mais rápidas de acessar."
 
 ---
 
