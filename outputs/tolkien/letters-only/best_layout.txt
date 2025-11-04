@@ -1,0 +1,10 @@
+1234567890-=xqpguswhdf[]\clantreoi;'zjvkymb,./
+
+1 2 3 4 5 6 7 8 9 0 - =
+ x q p g u s w h d f [ ] \
+  c l a n t r e o i ; '
+   z j v k y m b , . /
+
+Melhor custo: 858328991.15 ms, aptidão: 1.17e-09
+Custo da linha de base (QWERTY): 925229130.51 ms
+Melhoria sobre QWERTY: 7.23%

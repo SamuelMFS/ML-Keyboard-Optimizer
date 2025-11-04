@@ -1,0 +1,10 @@
+1234567890-=kxfhndctiv[]\gluesraom;'wyjzqbp,./
+
+1 2 3 4 5 6 7 8 9 0 - =
+ k x f h n d c t i v [ ] \
+  g l u e s r a o m ; '
+   w y j z q b p , . /
+
+Melhor custo: 856928803.11 ms, aptidão: 1.17e-09
+Custo da linha de base (QWERTY): 949231320.95 ms
+Melhoria sobre QWERTY: 9.72%

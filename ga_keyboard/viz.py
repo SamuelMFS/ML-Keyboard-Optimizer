@@ -66,19 +66,37 @@ def per_key_cost_approx(
 def plot_heatmap(layout: List[str], key_cost: Dict[str, float], out_path: str) -> None:
 	# Build ragged grid per row, then pad with NaNs to rectangular shape
 	grid: List[List[float]] = []
+	key_grid: List[List[str]] = []  # Store key symbols
 	for indices in KEY_ROWS:
 		row_vals = []
+		row_keys = []
 		for idx in indices:
 			k = CANONICAL_47[idx]
 			row_vals.append(key_cost.get(k, 0.0))
+			row_keys.append(k)
 		grid.append(row_vals)
+		key_grid.append(row_keys)
 	# Pad rows to max length
 	max_len = max(len(r) for r in grid) if grid else 0
 	padded = [r + [float('nan')] * (max_len - len(r)) for r in grid]
+	key_padded = [r + [''] * (max_len - len(r)) for r in key_grid]
 	arr = np.array(padded, dtype=float)
+	
+	# Create annotations with key symbol in corner and value
+	annot_arr = np.empty_like(arr, dtype=object)
+	for i in range(arr.shape[0]):
+		for j in range(arr.shape[1]):
+			if np.isnan(arr[i, j]):
+				annot_arr[i, j] = ''
+			else:
+				key_symbol = key_padded[i][j] if j < len(key_padded[i]) else ''
+				# Format: key symbol in top-left corner, value below
+				annot_arr[i, j] = f'{key_symbol}\n{arr[i, j]:.0f}'
+	
 	plt.figure(figsize=(10, 4))
-	sns.heatmap(arr, annot=False, cmap="viridis")
-	plt.title("Per-key cost (approx)")
+	sns.heatmap(arr, annot=annot_arr, fmt='', cmap="viridis", 
+	            annot_kws={'size': 7, 'ha': 'left', 'va': 'top', 'weight': 'bold'})
+	plt.title("Custo por Tecla (Aproximado)")
 	plt.tight_layout()
 	os.makedirs(os.path.dirname(out_path), exist_ok=True)
 	plt.savefig(out_path)
@@ -88,9 +106,9 @@ def plot_heatmap(layout: List[str], key_cost: Dict[str, float], out_path: str) -
 def plot_fitness(fitnesses: List[float], out_path: str) -> None:
 	plt.figure(figsize=(8, 4))
 	plt.plot(fitnesses)
-	plt.xlabel("Generation")
-	plt.ylabel("Fitness")
-	plt.title("Evolution of Fitness")
+	plt.xlabel("Geração")
+	plt.ylabel("Aptidão")
+	plt.title("Evolução da Aptidão")
 	plt.tight_layout()
 	os.makedirs(os.path.dirname(out_path), exist_ok=True)
 	plt.savefig(out_path)
@@ -126,32 +144,38 @@ def plot_unigram_timing_heatmap(timings: TimingDicts, out_path: str) -> None:
 	
 	# Build grid with unigram times per key
 	grid: List[List[float]] = []
+	key_grid: List[List[str]] = []  # Store key symbols
 	for indices in KEY_ROWS:
 		row_vals = []
+		row_keys = []
 		for idx in indices:
 			k = CANONICAL_47[idx]
 			time = avg_uni.get(k, float('nan'))
 			row_vals.append(time)
+			row_keys.append(k)
 		grid.append(row_vals)
+		key_grid.append(row_keys)
 	
 	# Pad rows to max length
 	max_len = max(len(r) for r in grid) if grid else 0
 	padded = [r + [float('nan')] * (max_len - len(r)) for r in grid]
+	key_padded = [r + [''] * (max_len - len(r)) for r in key_grid]
 	arr = np.array(padded, dtype=float)
 	
 	plt.figure(figsize=(10, 4))
-	# Format annotations: show values with 1 decimal place, use 'nan' for missing
+	# Format annotations: key symbol in corner, value with 1 decimal place
 	annot_arr = np.empty_like(arr, dtype=object)
 	for i in range(arr.shape[0]):
 		for j in range(arr.shape[1]):
 			if np.isnan(arr[i, j]):
 				annot_arr[i, j] = ''
 			else:
-				annot_arr[i, j] = f'{arr[i, j]:.1f}'
+				key_symbol = key_padded[i][j] if j < len(key_padded[i]) else ''
+				annot_arr[i, j] = f'{key_symbol}\n{arr[i, j]:.1f}'
 	
-	sns.heatmap(arr, annot=annot_arr, fmt='', cmap=cyan_cmap, cbar_kws={'label': 'Time (ms)'},
-	            annot_kws={'size': 8})
-	plt.title("Average Unigram Timing per Key")
+	sns.heatmap(arr, annot=annot_arr, fmt='', cmap=cyan_cmap, cbar_kws={'label': 'Tempo (ms)'},
+	            annot_kws={'size': 7, 'ha': 'left', 'va': 'top', 'weight': 'bold'})
+	plt.title("Tempo Médio de Unigrama por Tecla")
 	plt.tight_layout()
 	os.makedirs(os.path.dirname(out_path), exist_ok=True)
 	plt.savefig(out_path)
@@ -189,36 +213,84 @@ def plot_bigram_timing_heatmap(timings: TimingDicts, out_path: str) -> None:
 	
 	# Build grid
 	grid: List[List[float]] = []
+	key_grid: List[List[str]] = []  # Store key symbols
 	for indices in KEY_ROWS:
 		row_vals = []
+		row_keys = []
 		for idx in indices:
 			k = CANONICAL_47[idx]
 			time = key_avg_bigram.get(k, float('nan'))
 			row_vals.append(time)
+			row_keys.append(k)
 		grid.append(row_vals)
+		key_grid.append(row_keys)
 	
 	# Pad rows to max length
 	max_len = max(len(r) for r in grid) if grid else 0
 	padded = [r + [float('nan')] * (max_len - len(r)) for r in grid]
+	key_padded = [r + [''] * (max_len - len(r)) for r in key_grid]
 	arr = np.array(padded, dtype=float)
 	
 	plt.figure(figsize=(10, 4))
-	# Format annotations: show values with 1 decimal place, use 'nan' for missing
+	# Format annotations: key symbol in corner, value with 1 decimal place
 	annot_arr = np.empty_like(arr, dtype=object)
 	for i in range(arr.shape[0]):
 		for j in range(arr.shape[1]):
 			if np.isnan(arr[i, j]):
 				annot_arr[i, j] = ''
 			else:
-				annot_arr[i, j] = f'{arr[i, j]:.1f}'
+				key_symbol = key_padded[i][j] if j < len(key_padded[i]) else ''
+				annot_arr[i, j] = f'{key_symbol}\n{arr[i, j]:.1f}'
 	
-	sns.heatmap(arr, annot=annot_arr, fmt='', cmap=cyan_cmap, cbar_kws={'label': 'Time (ms)'},
-	            annot_kws={'size': 8})
-	plt.title("Average Bigram Timing per Key")
+	sns.heatmap(arr, annot=annot_arr, fmt='', cmap=cyan_cmap, cbar_kws={'label': 'Tempo (ms)'},
+	            annot_kws={'size': 7, 'ha': 'left', 'va': 'top', 'weight': 'bold'})
+	plt.title("Tempo Médio de Bigrama por Tecla")
 	plt.tight_layout()
 	os.makedirs(os.path.dirname(out_path), exist_ok=True)
 	plt.savefig(out_path)
 	plt.close()
 
+
+
+def plot_corpus_usage_heatmap(freq_uni: Dict[str, int], out_path: str) -> None:
+	"""Plot heatmap of corpus key usage (unigram frequencies) mapped to physical keys."""
+	# Build grid of counts aligned to physical keys
+	grid: List[List[float]] = []
+	key_grid: List[List[str]] = []
+	for indices in KEY_ROWS:
+		row_vals = []
+		row_keys = []
+		for idx in indices:
+			k = CANONICAL_47[idx]
+			count = float(freq_uni.get(k, 0))
+			row_vals.append(count if count > 0 else float('nan'))
+			row_keys.append(k)
+		grid.append(row_vals)
+		key_grid.append(row_keys)
+
+	# Pad rows
+	max_len = max(len(r) for r in grid) if grid else 0
+	padded = [r + [float('nan')] * (max_len - len(r)) for r in grid]
+	key_padded = [r + [''] * (max_len - len(r)) for r in key_grid]
+	arr = np.array(padded, dtype=float)
+
+	plt.figure(figsize=(10, 4))
+	# Annotations: key symbol and raw count (compact)
+	annot_arr = np.empty_like(arr, dtype=object)
+	for i in range(arr.shape[0]):
+		for j in range(arr.shape[1]):
+			if np.isnan(arr[i, j]):
+				annot_arr[i, j] = ''
+			else:
+				key_symbol = key_padded[i][j] if j < len(key_padded[i]) else ''
+				annot_arr[i, j] = f'{key_symbol}\n{int(arr[i, j])}'
+
+	sns.heatmap(arr, annot=annot_arr, fmt='', cmap=_create_cyan_cmap(),
+	            cbar_kws={'label': 'Frequência'}, annot_kws={'size': 7, 'ha': 'left', 'va': 'top', 'weight': 'bold'})
+	plt.title("Uso de Teclas no Corpus (Unigramas)")
+	plt.tight_layout()
+	os.makedirs(os.path.dirname(out_path), exist_ok=True)
+	plt.savefig(out_path)
+	plt.close()
 
 

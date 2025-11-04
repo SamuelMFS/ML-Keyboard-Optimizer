@@ -49,3 +49,22 @@ def format_layout_ascii(layout: List[str]) -> str:
 def layout_string(layout: List[str]) -> str:
 	"""Compact layout string."""
 	return "".join(layout)
+
+
+def get_letter_indices() -> List[int]:
+	"""Return indices of letter keys (a-z) in CANONICAL_47."""
+	letters = "abcdefghijklmnopqrstuvwxyz"
+	return [i for i, key in enumerate(CANONICAL_47) if key.lower() in letters]
+
+
+def get_number_indices() -> List[int]:
+	"""Return indices of number keys (0-9) in CANONICAL_47."""
+	numbers = "0123456789"
+	return [i for i, key in enumerate(CANONICAL_47) if key in numbers]
+
+
+def get_symbol_indices() -> List[int]:
+	"""Return indices of symbol keys (non-letter, non-number) in CANONICAL_47."""
+	letters = "abcdefghijklmnopqrstuvwxyz"
+	numbers = "0123456789"
+	return [i for i, key in enumerate(CANONICAL_47) if key.lower() not in letters and key not in numbers]

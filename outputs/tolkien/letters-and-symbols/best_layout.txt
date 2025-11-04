@@ -1,0 +1,10 @@
+1234567890\'=qvbwrlhdu,x[cfontseai.k/]zjymgp-;
+
+1 2 3 4 5 6 7 8 9 0 \ '
+ = q v b w r l h d u , x [
+  c f o n t s e a i . k
+   / ] z j y m g p - ;
+
+Melhor custo: 853893071.00 ms, aptidão: 1.17e-09
+Custo da linha de base (QWERTY): 925229130.51 ms
+Melhoria sobre QWERTY: 7.71%

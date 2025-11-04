@@ -48,11 +48,18 @@ def _safe_mean(values: List[float]) -> float:
 	return sum(values) / len(values)
 
 
-def parse_typing_csv(csv_path: str, json_column: str = "typing_data") -> Tuple[Dict[str, float], Dict[str, float]]:
-	"""Parse CSV and extract unigram and bigram timings."""
+def parse_typing_csv(csv_path: str, json_column: str = "typing_data") -> Tuple[Dict[str, float], Dict[str, float], Dict[str, Tuple[float, float]]]:
+	"""Parse CSV and extract unigram and bigram timings.
+	
+	Returns:
+		- avg_uni: dict mapping unigram to average time
+		- avg_bi: dict mapping bigram to average total time
+		- avg_bi_letter_times: dict mapping bigram to (avg_time_key1, avg_time_key2)
+	"""
 	df = pd.read_csv(csv_path)
 	unigram_times: Dict[str, List[float]] = defaultdict(list)
 	bigram_times: Dict[str, List[float]] = defaultdict(list)
+	bigram_letter_times: Dict[str, List[Tuple[float, float]]] = defaultdict(list)
 
 	for _, row in df.iterrows():
 		cell = row.get(json_column)
@@ -70,9 +77,9 @@ def parse_typing_csv(csv_path: str, json_column: str = "typing_data") -> Tuple[D
 		for rec in records:
 			seq = str(rec.get("sequence", ""))
 			total = rec.get("totalSequenceTime")
+			lts = rec.get("letterTimings", [])
 
 			if total is None:
-				lts = rec.get("letterTimings", [])
 				try:
 					total = sum(float(x.get("reactionTime", 0.0)) for x in lts)
 				except Exception:
@@ -82,22 +89,44 @@ def parse_typing_csv(csv_path: str, json_column: str = "typing_data") -> Tuple[D
 				unigram_times[seq].append(float(total))
 			elif len(seq) == 2:
 				bigram_times[seq].append(float(total))
+				# Extract individual letter timings
+				if len(lts) >= 2:
+					try:
+						time1 = float(lts[0].get("reactionTime", 0.0))
+						time2 = float(lts[1].get("reactionTime", 0.0))
+						bigram_letter_times[seq].append((time1, time2))
+					except Exception:
+						pass
 
 	avg_uni = {k: _safe_mean(v) for k, v in unigram_times.items()}
 	avg_bi = {k: _safe_mean(v) for k, v in bigram_times.items()}
-	return avg_uni, avg_bi
+	
+	# Average letter timings for each bigram
+	avg_bi_letter_times: Dict[str, Tuple[float, float]] = {}
+	for k, times_list in bigram_letter_times.items():
+		if times_list:
+			avg_time1 = _safe_mean([t[0] for t in times_list])
+			avg_time2 = _safe_mean([t[1] for t in times_list])
+			avg_bi_letter_times[k] = (avg_time1, avg_time2)
+	
+	return avg_uni, avg_bi, avg_bi_letter_times
 
 
-def collect_key_combinations(key: str, avg_uni: Dict[str, float], avg_bi: Dict[str, float]) -> List[Tuple[str, float, str]]:
+def collect_key_combinations(key: str, avg_uni: Dict[str, float], avg_bi: Dict[str, float], 
+                             avg_bi_letter_times: Dict[str, Tuple[float, float]]) -> List[Tuple[str, float, str, Tuple[float, float] | None]]:
 	"""
 	Collect all timing data for a specific key.
-	Returns list of (label, time, type) tuples where type is 'uni' or 'bi'.
+	Returns list of (label, total_time, type, letter_times) tuples where:
+		- label: display label
+		- total_time: total time for unigram or bigram
+		- type: 'uni' or 'bi'
+		- letter_times: for bigrams, (time_key1, time_key2), else None
 	"""
-	results: List[Tuple[str, float, str]] = []
+	results: List[Tuple[str, float, str, Tuple[float, float] | None]] = []
 	
 	# Unigram: the key by itself
 	if key in avg_uni:
-		results.append((f"{key} (unigrama)", avg_uni[key], "uni"))
+		results.append((f"{key} (unigrama)", avg_uni[key], "uni", None))
 	
 	# Bigrams: all combinations involving this key
 	# Format: "key_other" and "other_key"
@@ -105,58 +134,131 @@ def collect_key_combinations(key: str, avg_uni: Dict[str, float], avg_bi: Dict[s
 		# Combination: key + other
 		combo1 = f"{key}{other}"
 		if combo1 in avg_bi:
-			results.append((f"{key}+{other}", avg_bi[combo1], "bi"))
+			letter_times = avg_bi_letter_times.get(combo1, None)
+			results.append((f"{key}+{other}", avg_bi[combo1], "bi", letter_times))
 		
 		# Combination: other + key
 		combo2 = f"{other}{key}"
 		if combo2 in avg_bi:
-			results.append((f"{other}+{key}", avg_bi[combo2], "bi"))
+			letter_times = avg_bi_letter_times.get(combo2, None)
+			results.append((f"{other}+{key}", avg_bi[combo2], "bi", letter_times))
 	
 	# Sort by time (ascending)
 	results.sort(key=lambda x: x[1])
 	return results
 
 
-def plot_key_cost_analysis(key: str, data: List[Tuple[str, float, str]], out_path: str) -> None:
-	"""Generate bar chart showing key costs."""
+def plot_key_cost_analysis(key: str, data: List[Tuple[str, float, str, Tuple[float, float] | None]], out_path: str) -> None:
+	"""Generate bar chart showing key costs with individual letter contributions for bigrams."""
 	if not data:
 		print(f"Warning: No data found for key '{key}'")
 		return
 	
-	labels = [d[0] for d in data]
-	times = [d[1] for d in data]
-	types = [d[2] for d in data]
+	# Separate unigrams and bigrams
+	unigrams = [d for d in data if d[2] == 'uni']
+	bigrams = [d for d in data if d[2] == 'bi']
 	
-	# Color coding: unigram in one color, bigrams in another
-	colors = ['#1f77b4' if t == 'uni' else '#ff7f0e' for t in types]
+	# Create figure with subplots if we have both types
+	# Increase height for better readability: more space per item
+	fig_height = max(12, (len(unigrams) + len(bigrams)) * 0.35)
+	fig, ax = plt.subplots(figsize=(16, fig_height))
 	
-	# Create figure
-	fig, ax = plt.subplots(figsize=(14, max(8, len(data) * 0.15)))
+	# Prepare data for grouped bars
+	all_labels = []
+	all_times_total = []
+	all_times_key1 = []
+	all_times_key2 = []
+	all_types = []
+	all_has_letter_times = []
 	
-	# Horizontal bar chart for better readability with many items
-	y_pos = np.arange(len(labels))
-	bars = ax.barh(y_pos, times, color=colors, alpha=0.7)
+	# Process unigrams
+	for label, total_time, typ, _ in unigrams:
+		all_labels.append(label)
+		all_times_total.append(total_time)
+		all_times_key1.append(None)
+		all_times_key2.append(None)
+		all_types.append(typ)
+		all_has_letter_times.append(False)
+	
+	# Process bigrams
+	for label, total_time, typ, letter_times in bigrams:
+		all_labels.append(label)
+		all_times_total.append(total_time)
+		if letter_times is not None:
+			all_times_key1.append(letter_times[0])
+			all_times_key2.append(letter_times[1])
+			all_has_letter_times.append(True)
+		else:
+			all_times_key1.append(None)
+			all_times_key2.append(None)
+			all_has_letter_times.append(False)
+		all_types.append(typ)
+	
+	# Create horizontal bar chart
+	y_pos = np.arange(len(all_labels))
+	bar_height = 0.28  # Height for each bar group (increased for better spacing)
+	
+	# Plot bars for each category
+	has_first_uni = False
+	has_first_bi_total = False
+	has_first_bi_key1 = False
+	has_first_bi_key2 = False
+	
+	for i, (label, total, key1_time, key2_time, typ, has_letter_times) in enumerate(
+		zip(all_labels, all_times_total, all_times_key1, all_times_key2, all_types, all_has_letter_times)
+	):
+		if typ == 'uni':
+			# Unigram: single centered bar
+			bar = ax.barh(i, total, height=bar_height * 2.5, color='#1f77b4', alpha=0.7, 
+			              label='Unigrama' if not has_first_uni else '')
+			has_first_uni = True
+			# Add value label
+			ax.text(total + max(all_times_total) * 0.01, i,
+			        f'{total:.1f} ms', ha='left', va='center', fontsize=7)
+		else:
+			# Bigram: three bars stacked vertically
+			# Total bar (top)
+			bar_total = ax.barh(i - bar_height, total, height=bar_height, 
+			                   color='#ff7f0e', alpha=0.7, 
+			                   label='Bigrama Total' if not has_first_bi_total else '')
+			has_first_bi_total = True
+			ax.text(total + max(all_times_total) * 0.01, i - bar_height,
+			        f'{total:.1f} ms', ha='left', va='center', fontsize=7, fontweight='bold')
+			
+			# Individual key bars if available
+			if has_letter_times and key1_time is not None and key2_time is not None:
+				# Tecla 1 (middle)
+				bar_key1 = ax.barh(i, key1_time, height=bar_height, 
+				                  color='#2ca02c', alpha=0.6, 
+				                  label='Tecla 1 (dentro do bigrama)' if not has_first_bi_key1 else '')
+				has_first_bi_key1 = True
+				ax.text(key1_time + max(all_times_total) * 0.01, i,
+				        f'{key1_time:.1f} ms', ha='left', va='center', fontsize=6, style='italic')
+				
+				# Tecla 2 (bottom)
+				bar_key2 = ax.barh(i + bar_height, key2_time, height=bar_height, 
+				                  color='#d62728', alpha=0.6, 
+				                  label='Tecla 2 (dentro do bigrama)' if not has_first_bi_key2 else '')
+				has_first_bi_key2 = True
+				ax.text(key2_time + max(all_times_total) * 0.01, i + bar_height,
+				        f'{key2_time:.1f} ms', ha='left', va='center', fontsize=6, style='italic')
 	
 	# Labels
 	ax.set_yticks(y_pos)
-	ax.set_yticklabels(labels, fontsize=8)
+	ax.set_yticklabels(all_labels, fontsize=8)
 	ax.set_xlabel('Tempo (ms)', fontsize=12, fontweight='bold')
-	ax.set_title(f'Análise de Custo: Tecla "{key}"\nUnigrama vs. Todas as Combinações Bigrâmicas', 
+	ax.set_title(f'Análise de Custo: Tecla "{key}"\nUnigrama vs. Todas as Combinações Bigrâmicas (com Contribuições Individuais)', 
 	             fontsize=14, fontweight='bold', pad=20)
-	
-	# Add value labels on bars
-	for i, (bar, time) in enumerate(zip(bars, times)):
-		width = bar.get_width()
-		ax.text(width + max(times) * 0.01, bar.get_y() + bar.get_height()/2,
-		        f'{time:.1f} ms', ha='left', va='center', fontsize=7)
 	
 	# Legend
 	from matplotlib.patches import Patch
 	legend_elements = [
 		Patch(facecolor='#1f77b4', alpha=0.7, label='Unigrama'),
-		Patch(facecolor='#ff7f0e', alpha=0.7, label='Bigramas')
+		Patch(facecolor='#ff7f0e', alpha=0.7, label='Bigrama Total'),
+		Patch(facecolor='#2ca02c', alpha=0.6, label='Tecla 1 (dentro do bigrama)'),
+		Patch(facecolor='#d62728', alpha=0.6, label='Tecla 2 (dentro do bigrama)')
 	]
-	ax.legend(handles=legend_elements, loc='lower right')
+	ax.legend(handles=legend_elements, loc='lower right', fontsize=9)
 	
 	# Grid
 	ax.grid(axis='x', alpha=0.3, linestyle='--')
@@ -205,11 +307,12 @@ def main() -> None:
 			print(f"Aviso: typing_test.csv não encontrado em {typing_test_path}, pulando mesclagem")
 	
 	print(f"Carregando dados de digitação de {csv_to_use}...")
-	avg_uni, avg_bi = parse_typing_csv(csv_to_use, args.csv_json_col)
+	avg_uni, avg_bi, avg_bi_letter_times = parse_typing_csv(csv_to_use, args.csv_json_col)
 	print(f"Timings encontrados: {len(avg_uni)} unigramas, {len(avg_bi)} bigramas")
+	print(f"Timings individuais de teclas dentro de bigramas: {len(avg_bi_letter_times)} bigramas")
 	
 	print(f"Coletando combinações envolvendo a tecla '{args.key}'...")
-	data = collect_key_combinations(args.key, avg_uni, avg_bi)
+	data = collect_key_combinations(args.key, avg_uni, avg_bi, avg_bi_letter_times)
 	print(f"Encontradas {len(data)} combinações (1 unigrama + {len(data)-1} bigramas)")
 	
 	if not data:

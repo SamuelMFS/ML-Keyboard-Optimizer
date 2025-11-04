@@ -4,7 +4,7 @@ import os
 from typing import List
 from tqdm import tqdm
 
-from .layout import CANONICAL_47, DEFAULT_QWERTY_47, format_layout_ascii, layout_string
+from .layout import CANONICAL_47, DEFAULT_QWERTY_47, format_layout_ascii, layout_string, get_letter_indices, get_number_indices, get_symbol_indices
 from .typing_data import parse_typing_csv, merge_typing_csvs
 from .corpus import count_ngrams
 from .corpus_stats import count_corpus_characters, plot_character_frequencies, plot_bigram_frequencies
@@ -12,7 +12,7 @@ from .fitness import compute_cost, fitness_from_cost
 from .ga import init_population, evolve
 from .viz import (
 	per_key_cost_approx, plot_heatmap, plot_fitness, ascii_sparkline, ascii_layout,
-	plot_unigram_timing_heatmap, plot_bigram_timing_heatmap
+	plot_unigram_timing_heatmap, plot_bigram_timing_heatmap, plot_corpus_usage_heatmap
 )
 
 
@@ -30,6 +30,8 @@ def parse_args() -> argparse.Namespace:
 	p.add_argument("--cost-order", type=str, default="bi", choices=["uni","bi","tri"], help="Which n-gram order to use exclusively for cost")
 	p.add_argument("--fallback-to-unigrams", type=str, default="false", help="true/false: back off missing higher-order timings to unigrams")
 	p.add_argument("--mix-with-typing-test", action="store_true", help="Merge the provided CSV with typing_test.csv before processing")
+	p.add_argument("--letters-only", action="store_true", help="Only permute letter keys (a-z), numbers and symbols stay fixed")
+	p.add_argument("--letters-and-symbols", action="store_true", help="Permute letters and symbols, only numbers stay fixed")
 	p.add_argument("--seed", type=int, default=42)
 	p.add_argument("--outdir", default="/home/xamu/dev/ML/outputs")
 	return p.parse_args()
@@ -83,9 +85,27 @@ def main() -> None:
 	count_corpus_characters(args.corpus, char_stats_path)
 	plot_character_frequencies(args.corpus, char_chart_path, top_n=50)
 	plot_bigram_frequencies(args.corpus, bigram_chart_path, top_n=50)
+	# Heatmap de uso por tecla no corpus
+	plot_corpus_usage_heatmap(freq_uni, os.path.join(args.outdir, "corpus_usage_heatmap.png"))
+
+	# Determine permutable indices based on flags
+	permutable_indices: List[int] | None = None
+	if args.letters_only:
+		# Only letters can be permuted
+		permutable_indices = get_letter_indices()
+		print(f"Modo: apenas letras permutáveis ({len(permutable_indices)} teclas)")
+	elif args.letters_and_symbols:
+		# Letters and symbols can be permuted, numbers stay fixed
+		letter_indices = get_letter_indices()
+		symbol_indices = get_symbol_indices()
+		permutable_indices = sorted(letter_indices + symbol_indices)
+		print(f"Modo: letras e símbolos permutáveis ({len(permutable_indices)} teclas), números fixos")
+	else:
+		# All keys can be permuted (default behavior)
+		print("Modo: todas as teclas permutáveis")
 
 	print("Inicializando população…")
-	population = init_population(args.population, seed=args.seed)
+	population = init_population(args.population, seed=args.seed, permutable_indices=permutable_indices)
 
 	def fitness_fn(ind: List[str]) -> float:
 		cost = compute_cost(
@@ -102,6 +122,7 @@ def main() -> None:
 		mutation_rate=args.mutation_rate,
 		crossover_rate=args.crossover_rate,
 		elitism=args.elitism,
+		permutable_indices=permutable_indices,
 	)
 
 	# Evaluate best
@@ -143,7 +164,7 @@ def main() -> None:
 	key_cost = per_key_cost_approx(best, freq_uni, freq_bi, freq_tri, (avg_uni, avg_bi, avg_tri), use_trigrams)
 	plot_heatmap(best, key_cost, os.path.join(args.outdir, "heatmap.png"))
 	print(f"\nSaídas salvas em {args.outdir}")
-	
+
 	# Cleanup temporary merged file if created
 	if temp_merged_path and os.path.exists(temp_merged_path):
 		try:
